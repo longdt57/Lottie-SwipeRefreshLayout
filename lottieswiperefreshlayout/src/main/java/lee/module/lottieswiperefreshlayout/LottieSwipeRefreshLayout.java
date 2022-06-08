@@ -38,6 +38,7 @@ import android.widget.ListView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Px;
@@ -152,7 +153,8 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
     private final DecelerateInterpolator mDecelerateInterpolator;
     private static final int[] LAYOUT_ATTRS = new int[]{
             android.R.attr.enabled,
-            R.attr.lottie_rawRes
+            R.attr.lottie_srl_rawRes,
+            R.attr.lottie_srl_size
     };
 
     LottieAnimationView mCircleView;
@@ -380,25 +382,8 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         mCustomSlingshotDistance = slingshotDistance;
     }
 
-    /**
-     * One of DEFAULT, or LARGE.
-     */
-    public void setSize(int size) {
-        if (size != LARGE && size != DEFAULT) {
-            return;
-        }
-        final DisplayMetrics metrics = getResources().getDisplayMetrics();
-        if (size == LARGE) {
-            mCircleDiameter = (int) (CIRCLE_DIAMETER_LARGE * metrics.density);
-        } else {
-            mCircleDiameter = (int) (CIRCLE_DIAMETER * metrics.density);
-        }
-        // force the bounds of the progress circle inside the circle view to
-        // update by setting it to null before updating its size and then
-        // re-setting it
-//        mCircleView.setImageDrawable(null);
-//        mProgress.setStyle(size);
-//        mCircleView.setImageDrawable(mProgress);
+    public void setSize(@DimenRes int size) {
+        mCircleDiameter = getResources().getDimensionPixelSize(size);
     }
 
     /**
@@ -419,6 +404,9 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
     public LottieSwipeRefreshLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
+        final TypedArray a = context.obtainStyledAttributes(attrs, LAYOUT_ATTRS);
+        setSize(a.getResourceId(2, R.dimen.lottie_srl_size_default));
+
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         mMediumAnimationDuration = getResources().getInteger(
@@ -428,7 +416,6 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
 
         final DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleDiameter = (int) (CIRCLE_DIAMETER * metrics.density);
 
         createProgressView();
         setChildrenDrawingOrderEnabled(true);
@@ -440,10 +427,9 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
         setNestedScrollingEnabled(true);
 
-        mOriginalOffsetTop = mCurrentTargetOffsetTop = -mCircleDiameter;
+        mOriginalOffsetTop = mCurrentTargetOffsetTop = -mCircleDiameter/2;
         moveToStart(1.0f);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, LAYOUT_ATTRS);
         setEnabled(a.getBoolean(0, true));
         mCircleView.setAnimation(a.getResourceId(1, R.raw.lottie_swipe_refresh_default));
         a.recycle();
@@ -468,8 +454,6 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
     private void createProgressView() {
         mCircleView = (LottieAnimationView) inflate(getContext(), R.layout.lee_view_lottie_swipe_refresh_layout, null);
         mProgress = mCircleView;
-//        mProgress.setStyle(CircularProgressDrawable.DEFAULT);
-//        mCircleView.setImageDrawable(mProgress);
         mCircleView.setVisibility(View.GONE);
         addView(mCircleView);
     }
