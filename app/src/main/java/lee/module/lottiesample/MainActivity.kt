@@ -1,11 +1,11 @@
 package lee.module.lottiesample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout
+import lee.module.lottieswiperefreshlayout.custom.LottieSwipeRefreshLayout
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

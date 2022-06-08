@@ -96,7 +96,7 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
     private static final String LOG_TAG = LottieSwipeRefreshLayout.class.getSimpleName();
 
     private static final int MAX_ALPHA = 255;
-    private static final int STARTING_PROGRESS_ALPHA = (int) (.3f * MAX_ALPHA);
+    private static final int STARTING_PROGRESS_ALPHA = (int) (.5f * MAX_ALPHA);
 
     private static final float DECELERATE_INTERPOLATION_FACTOR = 2f;
     private static final int INVALID_POINTER = -1;
@@ -427,7 +427,7 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
         setNestedScrollingEnabled(true);
 
-        mOriginalOffsetTop = mCurrentTargetOffsetTop = -mCircleDiameter/2;
+        mOriginalOffsetTop = mCurrentTargetOffsetTop = -mCircleDiameter;
         moveToStart(1.0f);
 
         setEnabled(a.getBoolean(0, true));

@@ -2,4 +2,14 @@
 <resources>
     <attr name="lottie_srl_rawRes" format="reference"/>
     <attr name="lottie_srl_size" format="dimension" />
+
+    <declare-styleable name="SimpleSwipeRefreshLayout">
+        <attr name="max_offset_top" format="dimension" />
+        <attr name="trigger_offset_top" format="dimension" />
+        <attr name="indicator_overlay" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="LottieSwipeRefreshLayout">
+        <attr name="lottie_rawRes" format="reference" />
+    </declare-styleable>
 </resources>
