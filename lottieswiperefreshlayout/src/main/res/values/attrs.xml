@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="lottie_rawRes" format="reference"/>
-    <attr name="lottie_size" format="dimension" />
+    <attr name="lottie_srl_rawRes" format="reference"/>
+    <attr name="lottie_srl_size" format="dimension" />
 
-    <declare-styleable name="SimpleSwipeRefreshLayout">
+    <declare-styleable name="LottieSwipeRefreshLayout">
         <attr name="max_offset_top" format="dimension" />
         <attr name="trigger_offset_top" format="dimension" />
         <attr name="indicator_overlay" format="boolean" />
-    </declare-styleable>
 
-    <declare-styleable name="LottieSwipeRefreshLayout">
-        <attr name="lottie_rawRes" />
+        <attr name="lottie_srl_rawRes" />
+        <attr name="lottie_srl_size" />
     </declare-styleable>
 </resources>

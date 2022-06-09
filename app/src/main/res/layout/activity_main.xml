@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_dark"
-    app:lottie_rawRes="@raw/sample_lottie">
+    app:lottie_srl_rawRes="@raw/sample_lottie">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
