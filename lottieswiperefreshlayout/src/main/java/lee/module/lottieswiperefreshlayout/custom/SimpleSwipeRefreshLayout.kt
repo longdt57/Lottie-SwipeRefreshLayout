@@ -143,24 +143,23 @@ open class SimpleSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         layoutContentView()
     }
 
-    fun layoutTopView() {
+    private fun layoutTopView() {
         val topView = topChildView.view
         val topViewAttr = topChildView.positionAttr
 
         val lp = topView.layoutParams as LayoutParams
+        val top: Int = (paddingTop + lp.topMargin) - topViewAttr.height*2/3 - ELEVATION
+        val bottom = - ELEVATION
         if (lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
             val left: Int = paddingLeft + lp.leftMargin
-            val top: Int = (paddingTop + lp.topMargin) - topViewAttr.height/2 - ELEVATION
             val right: Int = left + topView.measuredWidth
-            val bottom = - ELEVATION
+
             topChildView = topChildView.copy(positionAttr = PositionAttr(left = left, top = top, right = right, bottom = bottom))
             topView.layout(left, top, right, bottom)
         } else {
             val indicatorWidth: Int = topView.measuredWidth
             val left: Int = width / 2 - indicatorWidth / 2
-            val top: Int = (paddingTop + lp.topMargin) - topViewAttr.height - ELEVATION
             val right: Int = width / 2 + indicatorWidth / 2
-            val bottom = -ELEVATION
 
             topChildView = topChildView.copy(positionAttr = PositionAttr(left = left, top = top, right = right, bottom = bottom))
             topView.layout(left, top, right, bottom)
@@ -168,7 +167,7 @@ open class SimpleSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     }
 
-    fun layoutContentView() {
+    private fun layoutContentView() {
         val contentView = contentChildView.view
 
         val lp = contentView.layoutParams as LayoutParams
@@ -341,7 +340,6 @@ open class SimpleSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         constructor(c: Context, attrs: AttributeSet?) : super(c, attrs)
 
         constructor(width: Int, height: Int) : super(width, height)
-        constructor(source: MarginLayoutParams) : super(source)
         constructor(source: ViewGroup.LayoutParams) : super(source)
     }
 

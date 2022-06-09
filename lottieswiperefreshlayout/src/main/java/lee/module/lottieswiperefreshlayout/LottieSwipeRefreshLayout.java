@@ -153,8 +153,8 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
     private final DecelerateInterpolator mDecelerateInterpolator;
     private static final int[] LAYOUT_ATTRS = new int[]{
             android.R.attr.enabled,
-            R.attr.lottie_srl_rawRes,
-            R.attr.lottie_srl_size
+            R.attr.lottie_rawRes,
+            R.attr.lottie_size
     };
 
     LottieAnimationView mCircleView;

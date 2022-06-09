@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="lottie_srl_rawRes" format="reference"/>
-    <attr name="lottie_srl_size" format="dimension" />
+    <attr name="lottie_rawRes" format="reference"/>
+    <attr name="lottie_size" format="dimension" />
 
     <declare-styleable name="SimpleSwipeRefreshLayout">
         <attr name="max_offset_top" format="dimension" />
@@ -10,6 +10,6 @@
     </declare-styleable>
 
     <declare-styleable name="LottieSwipeRefreshLayout">
-        <attr name="lottie_rawRes" format="reference" />
+        <attr name="lottie_rawRes" />
     </declare-styleable>
 </resources>

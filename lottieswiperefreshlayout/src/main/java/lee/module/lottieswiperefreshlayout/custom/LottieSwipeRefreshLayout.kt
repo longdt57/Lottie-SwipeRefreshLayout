@@ -1,18 +1,12 @@
 package lee.module.lottieswiperefreshlayout.custom
 
 import android.content.Context
-import android.graphics.ColorFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.model.KeyPath
-import com.airbnb.lottie.value.LottieValueCallback
 import lee.module.lottieswiperefreshlayout.R
 
 class LottieSwipeRefreshLayout @JvmOverloads constructor(
@@ -25,7 +19,7 @@ class LottieSwipeRefreshLayout @JvmOverloads constructor(
     private val lottieAnimationView by lazy {
         LottieAnimationView(context).apply {
             if (animationFile == -1) {
-                throw IllegalStateException("Could not resolve an animation for your pull to refresh layout")
+                animationFile = R.raw.lottie_swipe_refresh_default
             }
 
             setAnimation(animationFile)
@@ -64,12 +58,6 @@ class LottieSwipeRefreshLayout @JvmOverloads constructor(
         addTriggerListener {
             lottieAnimationView.resumeAnimation()
         }
-    }
-
-    fun setColorSchemeResources(color: Int) {
-        val filter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-        val callback: LottieValueCallback<ColorFilter> = LottieValueCallback(filter)
-        lottieAnimationView.addValueCallback(KeyPath("**"), LottieProperty.COLOR_FILTER, callback)
     }
 
     override fun stopRefreshing() {
