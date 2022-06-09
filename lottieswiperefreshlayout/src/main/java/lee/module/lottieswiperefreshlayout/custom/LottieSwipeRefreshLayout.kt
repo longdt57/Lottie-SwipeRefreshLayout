@@ -149,10 +149,12 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             initLottie(style)
             initOffset(style)
             overlay = style.getBoolean(R.styleable.LottieSwipeRefreshLayout_indicator_overlay, overlay)
+            isEnabled = true
         } finally {
             style.recycle()
         }
 
+        isChildrenDrawingOrderEnabled = true
         isNestedScrollingEnabled = true
     }
 
@@ -678,7 +680,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         // remove.
         if (remainingDistanceToScroll < 0 && !canChildScrollUp()) {
             mTotalUnconsumed += Math.abs(remainingDistanceToScroll).toFloat()
-//            moveSpinner(mTotalUnconsumed)
+            startRefreshing()
 
             // If we've gotten here, we need to consume whatever is left to consume, which at this
             // point is either equal to 0, or remainingDistanceToScroll.

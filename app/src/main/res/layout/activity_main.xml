@@ -1,26 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<lee.module.lottieswiperefreshlayout.custom.LottieSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/lottieSwipeRefresh"
+    android:id="@+id/parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/background_dark"
-    app:lottie_srl_rawRes="@raw/sample_lottie">
+    android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorBackground"
+        app:expandedTitleMarginStart="16dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:toolbarId="@id/toolbar">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:elevation="0dp"
+                app:layout_collapseMode="pin"
+                app:title="Hello World" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout
+        android:id="@+id/lottieSwipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        android:background="@android:color/darker_gray"
+        app:indicator_overlay="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:lottie_srl_rawRes="@raw/sample_lottie">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcvSimple"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</lee.module.lottieswiperefreshlayout.custom.LottieSwipeRefreshLayout>
+    </lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
