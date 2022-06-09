@@ -431,7 +431,7 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         moveToStart(1.0f);
 
         setEnabled(a.getBoolean(0, true));
-        mCircleView.setAnimation(a.getResourceId(1, R.raw.lottie_swipe_refresh_default));
+        mCircleView.setAnimation(a.getResourceId(1, R.raw.loader_zm));
         a.recycle();
     }
 
@@ -675,8 +675,9 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
             return;
         }
         final View child = mTarget;
+        final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
         final int childLeft = getPaddingLeft();
-        final int childTop = getPaddingTop();
+        final int childTop = getPaddingTop() + lp.topMargin;
         final int childWidth = width - getPaddingLeft() - getPaddingRight();
         final int childHeight = height - getPaddingTop() - getPaddingBottom();
         child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
@@ -695,10 +696,7 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
         if (mTarget == null) {
             return;
         }
-        mTarget.measure(MeasureSpec.makeMeasureSpec(
-                getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
-                MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(
-                getMeasuredHeight() - getPaddingTop() - getPaddingBottom(), MeasureSpec.EXACTLY));
+        measureChildWithMargins(mTarget, widthMeasureSpec, 0, heightMeasureSpec, 0);
         mCircleView.measure(MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY));
         mCircleViewIndex = -1;
@@ -709,6 +707,26 @@ public class LottieSwipeRefreshLayout extends ViewGroup implements NestedScrolli
                 break;
             }
         }
+    }
+
+    @Override
+    public boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return null != p && p instanceof MarginLayoutParams;
+    }
+
+    @Override
+    public LayoutParams generateDefaultLayoutParams() {
+        return new MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return new MarginLayoutParams(p);
     }
 
     /**
