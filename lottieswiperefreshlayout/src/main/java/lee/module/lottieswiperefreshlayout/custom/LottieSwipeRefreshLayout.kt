@@ -119,8 +119,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     private var currentState: State = State.IDLE
 
-    private val onProgressListeners: MutableCollection<(Float) -> Unit> = mutableListOf()
-    private val onTriggerListeners: MutableCollection<() -> Unit> = mutableListOf()
+    protected var mListener: OnRefreshListener? = null
 
     private val mNestedScrollingParentHelper: NestedScrollingParentHelper by lazy { NestedScrollingParentHelper(this) }
     private val mNestedScrollingChildHelper: NestedScrollingChildHelper by lazy { NestedScrollingChildHelper(this) }
@@ -178,14 +177,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
         val lottieSizeRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_size_default)
         setSize(lottieSizeRes)
-
-        addProgressListener {
-            lottieAnimationView.progress = it
-        }
-
-        addTriggerListener {
-            lottieAnimationView.resumeAnimation()
-        }
     }
 
     /**
@@ -347,10 +338,10 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         val bottom: Int = top + contentView.measuredHeight
 
         contentPosAttr = PositionAttr(
-                left = left,
-                top = top,
-                right = right,
-                bottom = bottom
+            left = left,
+            top = top,
+            right = right,
+            bottom = bottom
         )
         contentView.layout(left, top, right, bottom)
     }
@@ -489,7 +480,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             if (offsetY == 0F) 0F else if (triggerOffSetTop > offsetY) offsetY / triggerOffSetTop else 1F
         offsetY = offsetY.coerceIn(0f, maxOffSetTop.toFloat())
 
-        onProgressListeners.forEach { it(pullFraction) }
+        lottieAnimationView.progress = pullFraction
         lastPullFraction = pullFraction
 
         positionChildren(offsetY)
@@ -511,7 +502,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
                         currentState = State.TRIGGERING
                         isRefreshing = true
                         offsetY = triggerOffset.toFloat()
-                        onTriggerListeners.forEach { it() }
+                        lottieAnimationView.resumeAnimation()
+                        mListener?.onRefresh()
                     } else {
                         currentState = State.IDLE
                         offsetY = 0f
@@ -530,11 +522,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         if (!overlay) {
             mTarget.y = contentPosAttr.top + offset
         }
-    }
-
-    //<editor-fold desc="Helpers">
-    fun addProgressListener(onProgressListener: (Float) -> Unit) {
-        onProgressListeners.add(onProgressListener)
     }
 
     open fun setLegacyRequestDisallowInterceptTouchEventEnabled(enabled: Boolean) {
@@ -585,12 +572,17 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * Set the listener to be notified when a refresh is triggered via the swipe
      * gesture.
      */
-    open fun setOnRefreshListener(listener: () -> Unit) {
-        onTriggerListeners.add(listener)
+    open fun setOnRefreshListener(listener: OnRefreshListener?) {
+        mListener = listener
     }
 
-    private fun addTriggerListener(onTriggerListener: () -> Unit) {
-        onTriggerListeners.add(onTriggerListener)
+    open fun setOnRefreshListener(listener: () -> Unit) {
+        mListener = object : OnRefreshListener {
+            override fun onRefresh() {
+                listener.invoke()
+            }
+
+        }
     }
 
     override fun checkLayoutParams(p: LayoutParams?) = null != p && p is MarginLayoutParams
@@ -947,6 +939,18 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         consumed: Boolean
     ): Boolean {
         return mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed)
+    }
+
+
+    /**
+     * Classes that wish to be notified when the swipe gesture correctly
+     * triggers a refresh should implement this interface.
+     */
+    interface OnRefreshListener {
+        /**
+         * Called when a swipe gesture triggers a refresh.
+         */
+        fun onRefresh()
     }
 
     companion object {
