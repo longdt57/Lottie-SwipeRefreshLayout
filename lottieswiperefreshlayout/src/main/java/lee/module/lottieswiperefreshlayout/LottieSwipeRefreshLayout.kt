@@ -17,6 +17,8 @@ package lee.module.lottieswiperefreshlayout
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
@@ -36,9 +38,10 @@ import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.core.widget.ListViewCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.model.KeyPath
 import kotlin.math.abs
 
 /**
@@ -406,6 +409,13 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         speed = 2.0f
     }
 
+    fun updateLottieFilter(@ColorInt color: Int) {
+        lottieAnimationView.addValueCallback(
+            KeyPath("**"),
+            LottieProperty.COLOR_FILTER
+        ) { PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP) }
+    }
+
     /**
      * Set the listener to be notified when a refresh is triggered via the swipe
      * gesture.
@@ -611,7 +621,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         }
         val child: View = mTarget!!
         val childLeft = paddingLeft
-        val childTop: Int = if (shouldAnimateContent().not()) paddingTop else paddingTop + getContentOffset()
+        val childTop: Int = if (shouldAnimateContent().not()) paddingTop else paddingTop + getCurrentOffset()
         val childWidth = width - paddingLeft - paddingRight
         val childHeight = height - paddingTop - paddingBottom
         child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight)
@@ -1292,7 +1302,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     private fun shouldAnimateContent(): Boolean = overlay.not() && ensureTarget()
 
-    private fun getContentOffset() = mCurrentTargetOffsetTop - mOriginalOffsetTop
+    private fun getCurrentOffset() = mCurrentTargetOffsetTop - mOriginalOffsetTop
 
     /**
      * Classes that wish to be notified when the swipe gesture correctly
@@ -1334,7 +1344,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
         // Max amount of circle that can be filled by progress during swipe gesture,
         // where 1.0 is a full circle
-        private const val MAX_PROGRESS_ANGLE = .8f
         private const val SCALE_DOWN_DURATION = 250
         private const val ALPHA_ANIMATION_DURATION = 300
         private const val ANIMATE_TO_TRIGGER_DURATION = 200

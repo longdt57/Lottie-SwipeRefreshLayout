@@ -1,7 +1,8 @@
 package lee.module.lottiesample
 
+import android.graphics.Color
 import android.os.Bundle
-`import android.view.View
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<LottieSwipeRefreshLayout>(R.id.lottieSwipeRefresh).apply {
-
+            updateLottieFilter(Color.GREEN)
             setOnRefreshListener {
                 lifecycleScope.launch {
                     delay(3000)
