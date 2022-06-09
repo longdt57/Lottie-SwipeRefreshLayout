@@ -67,21 +67,23 @@ import kotlin.math.abs
  * provide accessibility events; instead, a menu item must be provided to allow
  * refresh of the content wherever this gesture is used.
  *
+ * How to customize:
+ * [createLottieView] override to custom lottie
+ * [setLottieColorFilter] set lottie tint color by
+ * [indicatorOverlay] true to keep [androidx.swiperefreshlayout.widget.SwipeRefreshLayout] swipe behavior,
+ * false to transform the child content while pull down
+ * [mScale] enable scale animation
+ * [mAlpha] enable alpha animation
+ *
  */
 open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
     ViewGroup(context, attrs, defStyle), NestedScrollingParent3, NestedScrollingParent2,
     NestedScrollingChild3, NestedScrollingChild2, NestedScrollingParent, NestedScrollingChild {
 
-    lateinit var lottieAnimationView: LottieAnimationView // mCircleView
+    protected lateinit var lottieAnimationView: LottieAnimationView // lottieAnimationView, lottieAnimationView
         private set
 
-    protected val mCircleView: LottieAnimationView
-        get() = lottieAnimationView
-
-    protected val mProgress: LottieAnimationView
-        get() = lottieAnimationView
-
-    private var mTarget: View? = null // the target of the gesture
+    private var mTarget: View? = null // the target of the gesture, or the contentView inside swiperefreshlayout
 
     protected var mListener: OnRefreshListener? = null
     protected var mRefreshing = false
@@ -116,12 +118,15 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     // Whether this item is alpha up rather than clipped
     protected var mAlpha = false
 
+    // Whether to overlay the indicator on top of the content or not
+    var indicatorOverlay = true
+
     // Target is returning to its start offset because it was cancelled or a
     // refresh was triggered.
     private var mReturningToStart = false
     private val mDecelerateInterpolator: DecelerateInterpolator
 
-    private var mCircleViewIndex = -1
+    private var lottieAnimationViewIndex = -1
 
     protected var mFrom = 0
     protected var mStartingScale = 0f
@@ -130,7 +135,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * @return The offset in pixels from the top of this view at which the progress spinner should
      * appear.
      */
-
 
     protected var mOriginalOffsetTop: Int = 0
 
@@ -160,24 +164,18 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      */
     private var mEnableLegacyRequestDisallowInterceptTouch = false
 
-    /**
-     * @param overlay Whether to overlay the indicator on top of the content or not
-     */
-    protected var overlay = true
-        private set
-
     private val mRefreshListener: AnimationListener = object : AnimationListener {
         override fun onAnimationStart(animation: Animation) {}
         override fun onAnimationRepeat(animation: Animation) {}
         override fun onAnimationEnd(animation: Animation) {
             if (mRefreshing) {
                 // Make sure the progress view is fully visible
-                mProgress.imageAlpha = MAX_ALPHA
-                mProgress.playAnimation()
+                lottieAnimationView.imageAlpha = MAX_ALPHA
+                lottieAnimationView.playAnimation()
                 if (mNotify) {
                     mListener?.onRefresh()
                 }
-                mCurrentTargetOffsetTop = mCircleView.top
+                mCurrentTargetOffsetTop = lottieAnimationView.top
             } else {
                 reset()
             }
@@ -186,17 +184,9 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     /**
      * Constructor that is called when inflating SwipeRefreshLayout from XML.
-     *
-     * @param context
-     * @param attrs
-     */
-    /**
-     * Simple constructor to use when creating a SwipeRefreshLayout from code.
-     *
-     * @param context
      */
     init {
-//        this.setWillNotDraw(false)
+        this.setWillNotDraw(false)
 
         val a = context.theme.obtainStyledAttributes(attrs, R.styleable.LottieSwipeRefreshLayout, defStyle, 0)
         createProgressView()
@@ -213,34 +203,34 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         isEnabled = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_android_enabled, true)
         mScale = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_scale_enabled, mScale)
         mAlpha = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_scale_enabled, mAlpha)
-        overlay = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_indicator_overlay, overlay)
+        indicatorOverlay = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_indicator_overlay, indicatorOverlay)
         a.recycle()
     }
 
     // Offset
     private fun initOffset(style: TypedArray) {
-        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_trigger_offset_top, mCircleDiameter)
+        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, -mCircleDiameter)
+        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, mCircleDiameter)
 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
-        mCurrentTargetOffsetTop = -mCircleDiameter
-        mOriginalOffsetTop = -mCircleDiameter
+        mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
     // Lottie
     private fun initLottie(style: TypedArray) {
 
         val lottieRawRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_rawRes, R.raw.loader_zm)
-        mCircleView.setAnimation(lottieRawRes)
+        lottieAnimationView.setAnimation(lottieRawRes)
 
         val lottieSizeRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_size_default)
         setSize(lottieSizeRes)
     }
 
     fun reset() {
-        mCircleView.clearAnimation()
-        mCircleView.pauseAnimation()
-        mCircleView.visibility = GONE
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.pauseAnimation()
+        lottieAnimationView.visibility = GONE
         setColorViewAlpha(if (mAlpha) STARTING_PROGRESS_ALPHA else MAX_ALPHA)
         // Return the circle to its start position
         if (mScale) {
@@ -248,7 +238,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         } else {
             setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCurrentTargetOffsetTop)
         }
-        mCurrentTargetOffsetTop = mCircleView.top
+        mCurrentTargetOffsetTop = lottieAnimationView.top
     }
 
     override fun setEnabled(enabled: Boolean) {
@@ -311,7 +301,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     private fun setColorViewAlpha(targetAlpha: Int) {
-        mProgress.imageAlpha = targetAlpha
+        lottieAnimationView.imageAlpha = targetAlpha
     }
 
     /**
@@ -359,7 +349,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     fun setProgressViewEndTarget(scale: Boolean, end: Int) {
         mSpinnerOffsetEnd = end
         mScale = scale
-        mCircleView.invalidate()
+        lottieAnimationView.invalidate()
     }
 
     /**
@@ -378,12 +368,12 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     override fun getChildDrawingOrder(childCount: Int, i: Int): Int {
-        return if (mCircleViewIndex < 0) {
+        return if (lottieAnimationViewIndex < 0) {
             i
         } else if (i == childCount - 1) {
             // Draw the selected child last
-            mCircleViewIndex
-        } else if (i >= mCircleViewIndex) {
+            lottieAnimationViewIndex
+        } else if (i >= lottieAnimationViewIndex) {
             // Move the children after the selected child earlier one
             i + 1
         } else {
@@ -394,8 +384,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     private fun createProgressView() {
         lottieAnimationView = createLottieView()
-        mCircleView.visibility = GONE
-        addView(mCircleView)
+        lottieAnimationView.visibility = GONE
+        addView(lottieAnimationView)
     }
 
     /**
@@ -409,7 +399,10 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         speed = 2.0f
     }
 
-    fun updateLottieFilter(@ColorInt color: Int) {
+    /**
+     * Set lottie tint color
+     */
+    fun setLottieColorFilter(@ColorInt color: Int) {
         lottieAnimationView.addValueCallback(
             KeyPath("**"),
             LottieProperty.COLOR_FILTER
@@ -433,8 +426,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     private fun startScaleUpAnimation(listener: AnimationListener) {
-        mCircleView.visibility = VISIBLE
-        mProgress.imageAlpha = MAX_ALPHA
+        lottieAnimationView.visibility = VISIBLE
+        lottieAnimationView.imageAlpha = MAX_ALPHA
         mScaleAnimation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 setAnimationProgress(interpolatedTime)
@@ -442,8 +435,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         }
         mScaleAnimation?.duration = mMediumAnimationDuration.toLong()
         mScaleAnimation?.setAnimationListener(listener)
-        mCircleView.clearAnimation()
-        mCircleView.startAnimation(mScaleAnimation)
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.startAnimation(mScaleAnimation)
     }
 
     /**
@@ -452,8 +445,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * @param progress
      */
     fun setAnimationProgress(progress: Float) {
-        mCircleView.scaleX = progress
-        mCircleView.scaleY = progress
+        lottieAnimationView.scaleX = progress
+        lottieAnimationView.scaleY = progress
     }
 
     private fun setRefreshing(refreshing: Boolean, notify: Boolean) {
@@ -477,28 +470,28 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         }
         mScaleDownAnimation?.duration = SCALE_DOWN_DURATION.toLong()
         mScaleDownAnimation?.setAnimationListener(listener)
-        mCircleView.clearAnimation()
-        mCircleView.startAnimation(mScaleDownAnimation)
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.startAnimation(mScaleDownAnimation)
     }
 
     private fun startProgressAlphaStartAnimation() {
-        mAlphaStartAnimation = startAlphaAnimation(mProgress.imageAlpha, STARTING_PROGRESS_ALPHA)
+        mAlphaStartAnimation = startAlphaAnimation(lottieAnimationView.imageAlpha, STARTING_PROGRESS_ALPHA)
     }
 
     private fun startProgressAlphaMaxAnimation() {
-        mAlphaMaxAnimation = startAlphaAnimation(mProgress.imageAlpha, MAX_ALPHA)
+        mAlphaMaxAnimation = startAlphaAnimation(lottieAnimationView.imageAlpha, MAX_ALPHA)
     }
 
     private fun startAlphaAnimation(startingAlpha: Int, endingAlpha: Int): Animation {
         val alpha: Animation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                mProgress.imageAlpha = (startingAlpha + (endingAlpha - startingAlpha) * interpolatedTime).toInt()
+                lottieAnimationView.imageAlpha = (startingAlpha + (endingAlpha - startingAlpha) * interpolatedTime).toInt()
             }
         }
         alpha.duration = ALPHA_ANIMATION_DURATION.toLong()
         // Clear out the previous animation listeners.
-        mCircleView.clearAnimation()
-        mCircleView.startAnimation(alpha)
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.startAnimation(alpha)
         return alpha
     }
 
@@ -522,7 +515,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * @param color
      */
     fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) {
-        mCircleView.setBackgroundColor(color)
+        lottieAnimationView.setBackgroundColor(color)
     }
 
     @Deprecated("Use {@link #setColorSchemeResources(int...)}")
@@ -555,7 +548,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      */
     fun setColorSchemeColors(@ColorInt vararg colors: Int) {
         ensureTarget()
-        //        mProgress.setColorSchemeColors(colors);
+        //        lottieAnimationView.setColorSchemeColors(colors);
     }
     /**
      * @return Whether the SwipeRefreshWidget is actively showing refresh
@@ -592,7 +585,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         if (mTarget == null) {
             for (i in 0 until childCount) {
                 val child = getChildAt(i)
-                if (child != mCircleView) {
+                if (child != lottieAnimationView) {
                     mTarget = child
                     return true
                 }
@@ -625,10 +618,10 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         val childWidth = width - paddingLeft - paddingRight
         val childHeight = height - paddingTop - paddingBottom
         child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight)
-        val circleWidth = mCircleView.measuredWidth
-        val circleHeight = mCircleView.measuredHeight
+        val circleWidth = lottieAnimationView.measuredWidth
+        val circleHeight = lottieAnimationView.measuredHeight
 
-        mCircleView.layout(
+        lottieAnimationView.layout(
             width / 2 - circleWidth / 2, mCurrentTargetOffsetTop,
             width / 2 + circleWidth / 2, mCurrentTargetOffsetTop + circleHeight
         )
@@ -643,15 +636,15 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             MeasureSpec.makeMeasureSpec(measuredWidth - paddingLeft - paddingRight, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(measuredHeight - paddingTop - paddingBottom, MeasureSpec.EXACTLY)
         )
-        mCircleView.measure(
+        lottieAnimationView.measure(
             MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(mCircleDiameter, MeasureSpec.EXACTLY)
         )
-        mCircleViewIndex = -1
+        lottieAnimationViewIndex = -1
         // Get the index of the circleview.
         for (index in 0 until childCount) {
-            if (getChildAt(index) === mCircleView) {
-                mCircleViewIndex = index
+            if (getChildAt(index) === lottieAnimationView) {
+                lottieAnimationViewIndex = index
                 break
             }
         }
@@ -864,7 +857,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         // If we get back to mTotalUnconsumed == 0 and there is more to go, hide
         // the circle so it isn't exposed if its blocking content is moved
         if (mUsingCustomStart && dy > 0 && mTotalUnconsumed == 0f && Math.abs(dy - consumed[1]) > 0) {
-            mCircleView.visibility = GONE
+            lottieAnimationView.visibility = GONE
         }
 
         // Now let our nested parent consume the leftovers
@@ -1016,43 +1009,38 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     private fun moveSpinner(overscrollTop: Float) {
         val originalDragPercent = overscrollTop / mTotalDragDistance
         val dragPercent = Math.min(1f, Math.abs(originalDragPercent))
-        val adjustedPercent = Math.max(dragPercent - .4, 0.0).toFloat() * 5 / 3
         val extraOS = Math.abs(overscrollTop) - mTotalDragDistance
-        val slingshotDist =
-            if (mCustomSlingshotDistance > 0) mCustomSlingshotDistance.toFloat() else (if (mUsingCustomStart) mSpinnerOffsetEnd - mOriginalOffsetTop else mSpinnerOffsetEnd).toFloat()
-        val tensionSlingshotPercent = Math.max(
-            0f, Math.min(extraOS, slingshotDist * 2)
-                    / slingshotDist
-        )
-        val tensionPercent = (tensionSlingshotPercent / 4 - Math.pow(
-            (tensionSlingshotPercent / 4).toDouble(), 2.0
-        )).toFloat() * 2f
+        val slingshotDist = if (mCustomSlingshotDistance > 0) {
+            mCustomSlingshotDistance.toFloat()
+        } else {
+            (if (mUsingCustomStart) mSpinnerOffsetEnd - mOriginalOffsetTop else mSpinnerOffsetEnd).toFloat()
+        }
+        val tensionSlingshotPercent = Math.max(0f, Math.min(extraOS, slingshotDist * 2) / slingshotDist)
+        val tensionPercent = (tensionSlingshotPercent / 4 - Math.pow((tensionSlingshotPercent / 4).toDouble(), 2.0)).toFloat() * 2f
         val extraMove = slingshotDist * tensionPercent * 2
         val targetY = mOriginalOffsetTop + (slingshotDist * dragPercent + extraMove).toInt()
         // where 1.0f is a full circle
-        if (mCircleView.visibility != VISIBLE) {
-            mCircleView.visibility = VISIBLE
+        if (lottieAnimationView.visibility != VISIBLE) {
+            lottieAnimationView.visibility = VISIBLE
         }
         if (!mScale) {
-            mCircleView.scaleX = 1f
-            mCircleView.scaleY = 1f
+            lottieAnimationView.scaleX = 1f
+            lottieAnimationView.scaleY = 1f
         }
         if (mScale) {
             setAnimationProgress(Math.min(1f, overscrollTop / mTotalDragDistance))
         }
         if (overscrollTop < mTotalDragDistance) {
-            if (mAlpha && mProgress.imageAlpha > STARTING_PROGRESS_ALPHA && isAnimationRunning(mAlphaStartAnimation).not()) {
+            if (mAlpha && lottieAnimationView.imageAlpha > STARTING_PROGRESS_ALPHA && isAnimationRunning(mAlphaStartAnimation).not()) {
                 // Animate the alpha
                 startProgressAlphaStartAnimation()
             }
         } else {
-            if (mAlpha && mProgress.imageAlpha <= MAX_ALPHA && !isAnimationRunning(mAlphaMaxAnimation)) {
+            if (mAlpha && lottieAnimationView.imageAlpha <= MAX_ALPHA && !isAnimationRunning(mAlphaMaxAnimation)) {
                 // Animate the alpha
                 startProgressAlphaMaxAnimation()
             }
         }
-//        val rotation = (-0.25f + .4f * adjustedPercent + tensionPercent * 2) * .5f
-//        mProgress.progress = getContentOffset() * 1f / (mSpinnerOffsetEnd - mOriginalOffsetTop) * .69f
         setTargetOffsetTopAndBottom(targetY - mCurrentTargetOffsetTop)
     }
 
@@ -1062,7 +1050,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         } else {
             // cancel refresh
             mRefreshing = false
-            //            mProgress.setStartEndTrim(0f, 0f);
+            //            lottieAnimationView.setStartEndTrim(0f, 0f);
             var listener: AnimationListener? = null
             if (!mScale) {
                 listener = object : AnimationListener {
@@ -1093,7 +1081,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         }
         when (action) {
             MotionEvent.ACTION_DOWN -> {
-                setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.top)
+                setTargetOffsetTopAndBottom(mOriginalOffsetTop - lottieAnimationView.top)
                 mActivePointerId = ev.getPointerId(0)
                 mIsBeingDragged = false
                 pointerIndex = ev.findPointerIndex(mActivePointerId)
@@ -1194,7 +1182,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         if (yDiff > mTouchSlop && !mIsBeingDragged) {
             mInitialMotionY = mInitialDownY + mTouchSlop
             mIsBeingDragged = true
-            mProgress.imageAlpha = STARTING_PROGRESS_ALPHA
+            lottieAnimationView.imageAlpha = STARTING_PROGRESS_ALPHA
         }
     }
 
@@ -1206,8 +1194,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         if (listener != null) {
             mAnimateToCorrectPosition.setAnimationListener(listener)
         }
-        mCircleView.clearAnimation()
-        mCircleView.startAnimation(mAnimateToCorrectPosition)
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.startAnimation(mAnimateToCorrectPosition)
     }
 
     private fun animateOffsetToStartPosition(from: Int, listener: AnimationListener?) {
@@ -1222,29 +1210,27 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             if (listener != null) {
                 mAnimateToStartPosition.setAnimationListener(listener)
             }
-            mCircleView.clearAnimation()
-            mCircleView.startAnimation(mAnimateToStartPosition)
+            lottieAnimationView.clearAnimation()
+            lottieAnimationView.startAnimation(mAnimateToStartPosition)
         }
     }
 
     private val mAnimateToCorrectPosition: Animation = object : Animation() {
         public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-            val endTarget: Int
-            if (!mUsingCustomStart) {
-                endTarget = mSpinnerOffsetEnd - abs(mOriginalOffsetTop)
+            val endTarget: Int = if (!mUsingCustomStart) {
+                mSpinnerOffsetEnd - abs(mOriginalOffsetTop)
             } else {
-                endTarget = mSpinnerOffsetEnd
+                mSpinnerOffsetEnd
             }
             val targetTop = mFrom + ((endTarget - mFrom) * interpolatedTime).toInt()
-            val offset = targetTop - mCircleView.top
+            val offset = targetTop - lottieAnimationView.top
             setTargetOffsetTopAndBottom(offset)
-            //            mProgress.setArrowScale(1 - interpolatedTime);
         }
     }
 
     fun moveToStart(interpolatedTime: Float) {
         val targetTop = mFrom + ((mOriginalOffsetTop - mFrom) * interpolatedTime).toInt()
-        val offset = targetTop - mCircleView.top
+        val offset = targetTop - lottieAnimationView.top
         setTargetOffsetTopAndBottom(offset)
     }
 
@@ -1259,7 +1245,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         listener: AnimationListener?
     ) {
         mFrom = from
-        mStartingScale = mCircleView.scaleX
+        mStartingScale = lottieAnimationView.scaleX
         mScaleDownToStartAnimation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 val targetScale = mStartingScale + -mStartingScale * interpolatedTime
@@ -1271,14 +1257,14 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         if (listener != null) {
             mScaleDownToStartAnimation?.setAnimationListener(listener)
         }
-        mCircleView.clearAnimation()
-        mCircleView.startAnimation(mScaleDownToStartAnimation)
+        lottieAnimationView.clearAnimation()
+        lottieAnimationView.startAnimation(mScaleDownToStartAnimation)
     }
 
     fun setTargetOffsetTopAndBottom(offset: Int) {
-        mCircleView.bringToFront()
-        ViewCompat.offsetTopAndBottom(mCircleView, offset)
-        mCurrentTargetOffsetTop = mCircleView.top
+        lottieAnimationView.bringToFront()
+        ViewCompat.offsetTopAndBottom(lottieAnimationView, offset)
+        mCurrentTargetOffsetTop = lottieAnimationView.top
     }
 
     private fun onSecondaryPointerUp(ev: MotionEvent) {
@@ -1300,7 +1286,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         return mSpinnerOffsetEnd
     }
 
-    private fun shouldAnimateContent(): Boolean = overlay.not() && ensureTarget()
+    private fun shouldAnimateContent(): Boolean = indicatorOverlay.not() && ensureTarget()
 
     private fun getCurrentOffset() = mCurrentTargetOffsetTop - mOriginalOffsetTop
 

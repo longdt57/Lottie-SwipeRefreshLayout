@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="lottie_srl_rawRes" format="reference" />
-    <attr name="lottie_srl_size" format="dimension" />
+
 
     <declare-styleable name="LottieSwipeRefreshLayout">
         <attr name="android:enabled" />
-        <attr name="max_offset_top" format="dimension" />
-        <attr name="trigger_offset_top" format="dimension" />
-        <attr name="indicator_overlay" format="boolean" />
-        <attr name="lottie_srl_rawRes" />
-        <attr name="lottie_srl_size" />
+        <attr name="lottie_srl_offset_end" format="dimension" />
+        <attr name="lottie_srl_offset_start" format="dimension" />
+        <attr name="lottie_srl_indicator_overlay" format="boolean" />
+        <attr name="lottie_srl_rawRes" format="reference" />
+        <attr name="lottie_srl_size" format="dimension" />
         <attr name="lottie_srl_scale_enabled" format="boolean" />
         <attr name="lottie_srl_alpha_enabled" format="boolean" />
     </declare-styleable>

@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/darker_gray"
-        app:indicator_overlay="false"
+        app:lottie_srl_indicator_overlay="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:lottie_srl_rawRes="@raw/sample_lottie">
 

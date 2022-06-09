@@ -148,7 +148,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         try {
             initLottie(style)
             initOffset(style)
-            overlay = style.getBoolean(R.styleable.LottieSwipeRefreshLayout_indicator_overlay, overlay)
+            overlay = style.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_indicator_overlay, overlay)
             isEnabled = true
         } finally {
             style.recycle()
@@ -163,8 +163,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         val defaultLottiSize = resources.getDimensionPixelOffset(R.dimen.lottie_size_default)
         val defaultOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, defaultLottiSize)
 
-        triggerOffSetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_trigger_offset_top, defaultOffsetTop)
-        maxOffSetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_max_offset_top, defaultOffsetTop * 2)
+        triggerOffSetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, defaultOffsetTop)
+        maxOffSetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, defaultOffsetTop * 2)
 
         if (maxOffSetTop <= triggerOffSetTop) {
             maxOffSetTop = triggerOffSetTop * 2
