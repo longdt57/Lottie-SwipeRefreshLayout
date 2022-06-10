@@ -218,19 +218,16 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Offset
     private fun initOffset(style: TypedArray) {
-        val defaultPadding: Int = dpToPx(CIRCLE_PADDING)
-        val paddingTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_top, defaultPadding)
-        val paddingBottom = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_bottom, defaultPadding)
+        val paddingTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_top, dpToPx(INDICATOR_PADDING_TOP))
+        val paddingBottom =
+            style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_bottom, dpToPx(INDICATOR_PADDING_BOTTOM))
 
-        val defaultOffsetTop = -mCircleDiameter - paddingBottom
-        val defaultOffsetEnd = mCircleDiameter + paddingTop + paddingBottom
-
-        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, defaultOffsetTop)
-        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, defaultOffsetEnd)
+        mOriginalOffsetTop = -mCircleDiameter - paddingBottom
+        mSpinnerOffsetEnd = mCircleDiameter + paddingTop + paddingBottom
 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
-        mCurrentTargetOffsetTop = -mCircleDiameter
+        mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
     fun reset() {
@@ -1334,7 +1331,9 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         private const val CIRCLE_DIAMETER = 40
         private const val CIRCLE_DIAMETER_LARGE = 56
 
-        private const val CIRCLE_PADDING = 16
+        // Spacing between lottie and top/bottom
+        private const val INDICATOR_PADDING_TOP = 12
+        private const val INDICATOR_PADDING_BOTTOM = 12
 
         private const val MAX_ALPHA = 255
         private const val STARTING_PROGRESS_ALPHA = (.3f * MAX_ALPHA).toInt()

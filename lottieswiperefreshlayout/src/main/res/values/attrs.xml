@@ -3,10 +3,6 @@
 
     <declare-styleable name="LottieSwipeRefreshLayout">
         <attr name="android:enabled" />
-        <!--    Offset to show Lottie Animation    -->
-        <attr name="lottie_srl_offset_end" format="dimension" />
-        <!--    Initial/Start Offset Lottie Animation     -->
-        <attr name="lottie_srl_offset_start" format="dimension" />
         <!--    The Lottie is Overlay the content or not  -->
         <attr name="lottie_srl_indicator_overlay" format="boolean" />
         <attr name="lottie_srl_rawRes" format="reference" />
