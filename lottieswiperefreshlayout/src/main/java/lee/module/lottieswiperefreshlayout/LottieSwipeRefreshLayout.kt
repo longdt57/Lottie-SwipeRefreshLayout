@@ -765,8 +765,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         // We must assume 2) is the case because we have no way of determining that it isn't, and
         // therefore must fallback to a previous hack that was done before nested scrolling 3
         // existed.
-        val remainingDistanceToScroll: Int
-        remainingDistanceToScroll = if (unconsumedAfterParents == 0) {
+        val remainingDistanceToScroll: Int = if (unconsumedAfterParents == 0) {
             // The previously implemented hack is to see how far we were offset and assume that that
             // distance is equal to how much all of our parents consumed.
             dyUnconsumed + mParentOffsetInWindow[1]
@@ -855,7 +854,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
                 mTotalUnconsumed -= dy.toFloat()
                 consumed[1] = dy
             }
-            moveSpinner(mTotalUnconsumed)
         }
 
         // If a client layout is using a custom start position for the circle

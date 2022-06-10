@@ -34,7 +34,6 @@
         android:background="@android:color/darker_gray"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:lottie_srl_indicator_overlay="false"
-        app:lottie_srl_offset_end_spacing="50dp"
         app:lottie_srl_rawRes="@raw/sample_lottie">
 
         <androidx.recyclerview.widget.RecyclerView
