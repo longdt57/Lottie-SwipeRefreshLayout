@@ -223,8 +223,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         val lottieRawRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_rawRes, R.raw.loader_zm)
         lottieAnimationView.setAnimation(lottieRawRes)
 
-        val lottieSizeRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_size_default)
-        setSize(lottieSizeRes)
+        val lottieSize = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_srl_size_small)
+        setSize(lottieSize)
     }
 
     fun reset() {
@@ -365,6 +365,14 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     fun setSize(@DimenRes size: Int) {
         mCircleDiameter = resources.getDimensionPixelSize(size)
+    }
+
+    fun setSmallSize() {
+        setSize(R.dimen.lottie_srl_size_small)
+    }
+
+    fun setLargeSize() {
+        setSize(R.dimen.lottie_srl_size_large)
     }
 
     override fun getChildDrawingOrder(childCount: Int, i: Int): Int {

@@ -160,7 +160,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Offset
     private fun initOffset(style: TypedArray) {
-        val defaultLottiSize = resources.getDimensionPixelOffset(R.dimen.lottie_size_default)
+        val defaultLottiSize = resources.getDimensionPixelOffset(R.dimen.lottie_srl_size_small)
         val defaultOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, defaultLottiSize)
 
         triggerOffSetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, defaultOffsetTop)
@@ -177,8 +177,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         val lottieRawRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_rawRes, R.raw.loader_zm)
         lottieAnimationView.setAnimation(lottieRawRes)
 
-        val lottieSizeRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_size_default)
-        setSize(lottieSizeRes)
+        val lottieSize = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_srl_size_small)
+        setSize(lottieSize)
     }
 
     /**
