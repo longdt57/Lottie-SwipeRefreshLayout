@@ -395,7 +395,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         repeatCount = LottieDrawable.INFINITE
 
         val density = context.resources.displayMetrics.density
-        ViewCompat.setElevation(this, ELEVATION * density)
         speed = 2.0f
     }
 
@@ -548,12 +547,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      */
     fun setColorSchemeColors(@ColorInt vararg colors: Int) {
         ensureTarget()
-        //        lottieAnimationView.setColorSchemeColors(colors);
     }
-    /**
-     * @return Whether the SwipeRefreshWidget is actively showing refresh
-     * progress.
-     *//* notify */// scale and show
     /**
      * Notify the widget that refresh state has changed. Do not call this when
      * refresh is triggered by a swipe gesture.
@@ -1050,7 +1044,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         } else {
             // cancel refresh
             mRefreshing = false
-            //            lottieAnimationView.setStartEndTrim(0f, 0f);
             var listener: AnimationListener? = null
             if (!mScale) {
                 listener = object : AnimationListener {
@@ -1318,8 +1311,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     companion object {
-
-        private const val ELEVATION = 4
 
         private val LOG_TAG = LottieSwipeRefreshLayout::class.java.simpleName
         private const val MAX_ALPHA = 255
