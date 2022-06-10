@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
     <declare-styleable name="LottieSwipeRefreshLayout">
         <attr name="android:enabled" />
+        <!--    Offset to show Lottie Animation    -->
         <attr name="lottie_srl_offset_end" format="dimension" />
+        <!--    Initial/Start Offset Lottie Animation     -->
         <attr name="lottie_srl_offset_start" format="dimension" />
+        <!--    The Lottie is Overlay the content or not  -->
         <attr name="lottie_srl_indicator_overlay" format="boolean" />
         <attr name="lottie_srl_rawRes" format="reference" />
+        <!--    The Lottie Animation size    -->
         <attr name="lottie_srl_size" format="dimension" />
+
+        <!--    The Spacing between Lottie View and Top.
+        This attr only works if lottie_srl_offset_end isn't defined.     -->
+        <attr name="lottie_srl_top_spacing" format="dimension" />
+
         <attr name="lottie_srl_scale_enabled" format="boolean" />
         <attr name="lottie_srl_alpha_enabled" format="boolean" />
     </declare-styleable>

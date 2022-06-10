@@ -153,7 +153,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     private var mScaleDownToStartAnimation: Animation? = null
 
     protected var mNotify = false
-    private var mCircleDiameter = 0
+    private var mCircleDiameter = dpToPx(CIRCLE_DIAMETER)
 
     // Whether the client has set a custom starting position;
     protected var mUsingCustomStart = false
@@ -207,24 +207,27 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         a.recycle()
     }
 
-    // Offset
-    private fun initOffset(style: TypedArray) {
-        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, -mCircleDiameter)
-        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, (mCircleDiameter * 1.5).toInt())
-
-        // the absolute offset has to take into account that the circle starts at an offset
-        mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
-        mCurrentTargetOffsetTop = mOriginalOffsetTop
-    }
-
     // Lottie
     private fun initLottie(style: TypedArray) {
 
         val lottieRawRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_rawRes, R.raw.loader_zm)
         lottieAnimationView.setAnimation(lottieRawRes)
 
-        val lottieSize = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, R.dimen.lottie_srl_size_small)
-        setSize(lottieSize)
+        val lottieSize = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_size, mCircleDiameter)
+        setSizePx(lottieSize)
+    }
+
+    // Offset
+    private fun initOffset(style: TypedArray) {
+        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, -mCircleDiameter)
+
+        var topSpacing: Int = dpToPx(TOP_SPACING)
+        topSpacing = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_top_spacing, topSpacing)
+        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, mCircleDiameter + topSpacing)
+
+        // the absolute offset has to take into account that the circle starts at an offset
+        mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
+        mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
     fun reset() {
@@ -363,16 +366,16 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         mCustomSlingshotDistance = slingshotDistance
     }
 
-    fun setSize(@DimenRes size: Int) {
-        mCircleDiameter = resources.getDimensionPixelSize(size)
+    fun setSizePx(@Px size: Int) {
+        mCircleDiameter = size
     }
 
     fun setSmallSize() {
-        setSize(R.dimen.lottie_srl_size_small)
+        setSizePx(dpToPx(CIRCLE_DIAMETER))
     }
 
     fun setLargeSize() {
-        setSize(R.dimen.lottie_srl_size_large)
+        setSizePx(dpToPx(CIRCLE_DIAMETER_LARGE))
     }
 
     override fun getChildDrawingOrder(childCount: Int, i: Int): Int {
@@ -401,8 +404,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      */
     protected fun createLottieView() = LottieAnimationView(context).apply {
         repeatCount = LottieDrawable.INFINITE
-
-        val density = context.resources.displayMetrics.density
         speed = 2.0f
     }
 
@@ -556,6 +557,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     fun setColorSchemeColors(@ColorInt vararg colors: Int) {
         ensureTarget()
     }
+
     /**
      * Notify the widget that refresh state has changed. Do not call this when
      * refresh is triggered by a swipe gesture.
@@ -1291,6 +1293,11 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     private fun getCurrentOffset() = mCurrentTargetOffsetTop - mOriginalOffsetTop
 
+    private fun dpToPx(dp: Int): Int {
+        val metrics = resources.displayMetrics
+        return (dp * metrics.density).toInt()
+    }
+
     /**
      * Classes that wish to be notified when the swipe gesture correctly
      * triggers a refresh should implement this interface.
@@ -1321,6 +1328,11 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     companion object {
 
         private val LOG_TAG = LottieSwipeRefreshLayout::class.java.simpleName
+
+        private const val CIRCLE_DIAMETER = 40
+        private const val CIRCLE_DIAMETER_LARGE = 56
+
+        private const val TOP_SPACING = 20
         private const val MAX_ALPHA = 255
         private const val STARTING_PROGRESS_ALPHA = (.3f * MAX_ALPHA).toInt()
         private const val DECELERATE_INTERPOLATION_FACTOR = 2f
