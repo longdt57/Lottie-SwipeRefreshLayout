@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<LottieSwipeRefreshLayout>(R.id.lottieSwipeRefresh).apply {
-            setLottieColorFilter(Color.BLACK)
+            setColorScheme(Color.BLACK)
             setOnRefreshListener {
                 lifecycleScope.launch {
                     delay(3000)

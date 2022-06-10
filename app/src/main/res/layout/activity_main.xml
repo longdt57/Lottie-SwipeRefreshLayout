@@ -1,48 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/parent"
+    android:id="@+id/lottieSwipeRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    app:lottie_srl_indicator_overlay="false"
+    app:lottie_srl_rawRes="@raw/sample_lottie">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/colorBackground"
-        app:expandedTitleMarginStart="16dp">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:toolbarId="@id/toolbar">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:elevation="0dp"
-                app:layout_collapseMode="pin"
-                app:title="Hello World" />
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout
-        android:id="@+id/lottieSwipeRefresh"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcvSimple"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/darker_gray"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:lottie_srl_indicator_overlay="false"
-        app:lottie_srl_rawRes="@raw/sample_lottie">
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rcvSimple"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-    </lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</lee.module.lottieswiperefreshlayout.LottieSwipeRefreshLayout>

@@ -17,8 +17,6 @@ package lee.module.lottieswiperefreshlayout
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
@@ -35,13 +33,10 @@ import android.view.animation.Transformation
 import android.widget.AbsListView
 import android.widget.ListView
 import androidx.annotation.*
-import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.core.widget.ListViewCompat
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.model.KeyPath
 import kotlin.math.abs
 
 /**
@@ -69,19 +64,21 @@ import kotlin.math.abs
  *
  * How to customize:
  * [createLottieView] override to custom lottie
- * [setLottieColorFilter] set lottie tint color by
- * [indicatorOverlay] The Lottie is Overlay the content or not
+ * [indicatorOverlay] The Lottie should Overlay the content or not
  * [setSizePx] to change the lottie size
- * [mScale] enable scale animation
- * [mAlpha] enable alpha animation
+ * [mScale] Whether enable scale animation
+ * [mAlpha] Whether enable alpha animation
  *
  */
 open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
     ViewGroup(context, attrs, defStyle), NestedScrollingParent3, NestedScrollingParent2,
     NestedScrollingChild3, NestedScrollingChild2, NestedScrollingParent, NestedScrollingChild {
 
-    protected lateinit var lottieAnimationView: LottieAnimationView // lottieAnimationView, lottieAnimationView
-        private set
+    /**
+     * Similar to [androidx.swiperefreshlayout.widget.SwipeRefreshLayout.mCircleView]
+     * and [androidx.swiperefreshlayout.widget.SwipeRefreshLayout.mProgress]
+     */
+    protected lateinit var lottieAnimationView: LottieAnimationView
 
     private var mTarget: View? = null // the target of the gesture, or the contentView inside swiperefreshlayout
 
@@ -146,13 +143,12 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     protected var mCustomSlingshotDistance = 0
 
-    private var mScaleAnimation: Animation? = null
-    private var mScaleDownAnimation: Animation? = null
     private var mAlphaStartAnimation: Animation? = null
     private var mAlphaMaxAnimation: Animation? = null
-    private var mScaleDownToStartAnimation: Animation? = null
 
     protected var mNotify = false
+
+    // The lottie size
     private var mCircleDiameter = dpToPx(CIRCLE_DIAMETER)
 
     // Whether the client has set a custom starting position;
@@ -232,7 +228,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     fun reset() {
         lottieAnimationView.clearAnimation()
-        lottieAnimationView.pauseAnimation()
+        lottieAnimationView.cancelAnimation()
         lottieAnimationView.visibility = GONE
         setColorViewAlpha(if (mAlpha) STARTING_PROGRESS_ALPHA else MAX_ALPHA)
         // Return the circle to its start position
@@ -408,17 +404,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     /**
-     * Set lottie tint color
-     */
-    fun setLottieColorFilter(@ColorInt color: Int?) {
-        if (color == null) return
-        lottieAnimationView.addValueCallback(
-            KeyPath("**"),
-            LottieProperty.COLOR_FILTER
-        ) { PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP) }
-    }
-
-    /**
      * Set the listener to be notified when a refresh is triggered via the swipe
      * gesture.
      */
@@ -437,13 +422,13 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     private fun startScaleUpAnimation(listener: AnimationListener) {
         lottieAnimationView.visibility = VISIBLE
         lottieAnimationView.imageAlpha = MAX_ALPHA
-        mScaleAnimation = object : Animation() {
+        val mScaleAnimation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 setAnimationProgress(interpolatedTime)
             }
         }
-        mScaleAnimation?.duration = mMediumAnimationDuration.toLong()
-        mScaleAnimation?.setAnimationListener(listener)
+        mScaleAnimation.duration = mMediumAnimationDuration.toLong()
+        mScaleAnimation.setAnimationListener(listener)
         lottieAnimationView.clearAnimation()
         lottieAnimationView.startAnimation(mScaleAnimation)
     }
@@ -472,13 +457,13 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     fun startScaleDownAnimation(listener: AnimationListener?) {
-        mScaleDownAnimation = object : Animation() {
+        val mScaleDownAnimation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 setAnimationProgress(1 - interpolatedTime)
             }
         }
-        mScaleDownAnimation?.duration = SCALE_DOWN_DURATION.toLong()
-        mScaleDownAnimation?.setAnimationListener(listener)
+        mScaleDownAnimation.duration = SCALE_DOWN_DURATION.toLong()
+        mScaleDownAnimation.setAnimationListener(listener)
         lottieAnimationView.clearAnimation()
         lottieAnimationView.startAnimation(mScaleDownAnimation)
     }
@@ -504,59 +489,9 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         return alpha
     }
 
-    @Deprecated("Use {@link #setProgressBackgroundColorSchemeResource(int)}")
-    fun setProgressBackgroundColor(colorRes: Int) {
-        setProgressBackgroundColorSchemeResource(colorRes)
-    }
-
-    /**
-     * Set the background color of the progress spinner disc.
-     *
-     * @param colorRes Resource id of the color.
-     */
-    fun setProgressBackgroundColorSchemeResource(@ColorRes colorRes: Int) {
-        setProgressBackgroundColorSchemeColor(ContextCompat.getColor(context, colorRes))
-    }
-
-    /**
-     * Set the background color of the progress spinner disc.
-     *
-     * @param color
-     */
-    fun setProgressBackgroundColorSchemeColor(@ColorInt color: Int) {
-        lottieAnimationView.setBackgroundColor(color)
-    }
-
-    @Deprecated("Use {@link #setColorSchemeResources(int...)}")
-    fun setColorScheme(@ColorRes vararg colors: Int) {
-        setColorSchemeResources(*colors)
-    }
-
-    /**
-     * Set the color resources used in the progress animation from color resources.
-     * The first color will also be the color of the bar that grows in response
-     * to a user swipe gesture.
-     *
-     * @param colorResIds
-     */
-    fun setColorSchemeResources(@ColorRes vararg colorResIds: Int) {
-        val context = context
-        val colorRes = IntArray(colorResIds.size)
-        for (i in 0 until colorResIds.size) {
-            colorRes[i] = ContextCompat.getColor(context, colorResIds[i])
-        }
-        setColorSchemeColors(*colorRes)
-    }
-
-    /**
-     * Set the colors used in the progress animation. The first
-     * color will also be the color of the bar that grows in response to a user
-     * swipe gesture.
-     *
-     * @param colors
-     */
-    fun setColorSchemeColors(@ColorInt vararg colors: Int) {
-        ensureTarget()
+    fun setColorScheme(@ColorInt color: Int?) {
+        if (color == null) return
+        LottieHelper.setColorFilter(lottieAnimationView, color)
     }
 
     /**
@@ -674,7 +609,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             return mChildScrollUpCallback!!.canChildScrollUp(this, mTarget)
         }
         return if (mTarget is ListView) {
-            ListViewCompat.canScrollList((mTarget as ListView?)!!, -1)
+            ListViewCompat.canScrollList((mTarget as ListView), -1)
         } else mTarget?.canScrollVertically(-1) ?: false
     }
 
@@ -1248,16 +1183,16 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     ) {
         mFrom = from
         mStartingScale = lottieAnimationView.scaleX
-        mScaleDownToStartAnimation = object : Animation() {
+        val mScaleDownToStartAnimation = object : Animation() {
             public override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 val targetScale = mStartingScale + -mStartingScale * interpolatedTime
                 setAnimationProgress(targetScale)
                 moveToStart(interpolatedTime)
             }
         }
-        mScaleDownToStartAnimation?.duration = SCALE_DOWN_DURATION.toLong()
+        mScaleDownToStartAnimation.duration = SCALE_DOWN_DURATION.toLong()
         if (listener != null) {
-            mScaleDownToStartAnimation?.setAnimationListener(listener)
+            mScaleDownToStartAnimation.setAnimationListener(listener)
         }
         lottieAnimationView.clearAnimation()
         lottieAnimationView.startAnimation(mScaleDownToStartAnimation)
