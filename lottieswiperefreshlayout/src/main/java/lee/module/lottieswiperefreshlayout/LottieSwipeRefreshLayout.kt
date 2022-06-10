@@ -210,7 +210,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     // Offset
     private fun initOffset(style: TypedArray) {
         mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, -mCircleDiameter)
-        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, mCircleDiameter)
+        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, (mCircleDiameter * 1.5).toInt())
 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
