@@ -15,7 +15,8 @@
 
         <!--    The Spacing between Lottie View and Top.
         This attr only works if lottie_srl_offset_end isn't defined.     -->
-        <attr name="lottie_srl_top_spacing" format="dimension" />
+        <attr name="lottie_srl_padding_top" format="dimension" />
+        <attr name="lottie_srl_padding_bottom" format="dimension" />
 
         <attr name="lottie_srl_scale_enabled" format="boolean" />
         <attr name="lottie_srl_alpha_enabled" format="boolean" />

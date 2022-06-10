@@ -38,7 +38,6 @@ import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.core.widget.ListViewCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.airbnb.lottie.LottieProperty
@@ -120,7 +119,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     protected var mAlpha = false
 
     // Whether to overlay the indicator on top of the content or not
-    var indicatorOverlay = true
+    var indicatorOverlay = false
 
     // Target is returning to its start offset because it was cancelled or a
     // refresh was triggered.
@@ -210,7 +209,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Lottie
     private fun initLottie(style: TypedArray) {
-
         val lottieRawRes = style.getResourceId(R.styleable.LottieSwipeRefreshLayout_lottie_srl_rawRes, R.raw.loader_zm)
         lottieAnimationView.setAnimation(lottieRawRes)
 
@@ -220,15 +218,19 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Offset
     private fun initOffset(style: TypedArray) {
-        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, -mCircleDiameter)
+        val defaultPadding: Int = dpToPx(CIRCLE_PADDING)
+        val paddingTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_top, defaultPadding)
+        val paddingBottom = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_bottom, defaultPadding)
 
-        var topSpacing: Int = dpToPx(TOP_SPACING)
-        topSpacing = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_top_spacing, topSpacing)
-        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, mCircleDiameter + topSpacing)
+        val defaultOffsetTop = -mCircleDiameter - paddingBottom
+        val defaultOffsetEnd = mCircleDiameter + paddingTop + paddingBottom
+
+        mOriginalOffsetTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_start, defaultOffsetTop)
+        mSpinnerOffsetEnd = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_offset_end, defaultOffsetEnd)
 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
-        mCurrentTargetOffsetTop = mOriginalOffsetTop
+        mCurrentTargetOffsetTop = -mCircleDiameter
     }
 
     fun reset() {
@@ -1332,7 +1334,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         private const val CIRCLE_DIAMETER = 40
         private const val CIRCLE_DIAMETER_LARGE = 56
 
-        private const val TOP_SPACING = 20
+        private const val CIRCLE_PADDING = 16
+
         private const val MAX_ALPHA = 255
         private const val STARTING_PROGRESS_ALPHA = (.3f * MAX_ALPHA).toInt()
         private const val DECELERATE_INTERPOLATION_FACTOR = 2f
