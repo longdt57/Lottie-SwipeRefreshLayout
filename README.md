@@ -1,7 +1,7 @@
-# kotlin-ext
+# LottieSwipeRefreshLayout
 [![Version](https://jitpack.io/v/longdt57/Lottie-SwipeRefreshLayout.svg)](https://github.com/longdt57/Lottie-SwipeRefreshLayout/releases)
 
-- LottieSwipeRefreshLayout: base on SwipeRefreshLayout 1.1.0
+- Base on SwipeRefreshLayout 1.1.0: https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout
 
 ## Demo
 
