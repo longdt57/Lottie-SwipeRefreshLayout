@@ -38,6 +38,7 @@ import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.core.widget.ListViewCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.airbnb.lottie.LottieProperty
@@ -70,8 +71,8 @@ import kotlin.math.abs
  * How to customize:
  * [createLottieView] override to custom lottie
  * [setLottieColorFilter] set lottie tint color by
- * [indicatorOverlay] true to keep [androidx.swiperefreshlayout.widget.SwipeRefreshLayout] swipe behavior,
- * false to transform the child content while pull down
+ * [indicatorOverlay] The Lottie is Overlay the content or not
+ * [setSizePx] to change the lottie size
  * [mScale] enable scale animation
  * [mAlpha] enable alpha animation
  *
@@ -410,7 +411,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     /**
      * Set lottie tint color
      */
-    fun setLottieColorFilter(@ColorInt color: Int) {
+    fun setLottieColorFilter(@ColorInt color: Int?) {
+        if (color == null) return
         lottieAnimationView.addValueCallback(
             KeyPath("**"),
             LottieProperty.COLOR_FILTER
