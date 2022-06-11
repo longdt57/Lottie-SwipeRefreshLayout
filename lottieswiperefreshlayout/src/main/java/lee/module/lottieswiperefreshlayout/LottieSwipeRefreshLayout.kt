@@ -123,7 +123,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     // Whether auto tint color by theme
     var autoTintColor = false
         set(value) {
-            if (field == value) return
             field = value
             enableAutoTintColor()
         }
