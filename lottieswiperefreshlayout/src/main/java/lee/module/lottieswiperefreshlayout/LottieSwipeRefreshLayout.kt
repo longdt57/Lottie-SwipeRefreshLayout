@@ -76,6 +76,25 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     ViewGroup(context, attrs, defStyle), NestedScrollingParent3, NestedScrollingParent2,
     NestedScrollingChild3, NestedScrollingChild2, NestedScrollingParent, NestedScrollingChild {
 
+    // Whether to overlay the indicator on top of the content or not
+    var indicatorOverlay = false
+
+    // Whether auto tint color by theme
+    var autoTintColor = false
+        set(value) {
+            field = value
+            if (field) enableAutoTintColor()
+        }
+
+    var lottieTopSpacing: Int = dpToPx(INDICATOR_VERTICAL_PADDING)
+    var lottieBottomSpacing: Int = dpToPx(INDICATOR_VERTICAL_PADDING)
+
+    // Whether this item is scaled up rather than clipped
+    var mScale = false
+
+    // Whether this item is alpha up rather than clipped
+    var mAlpha = false
+
     /**
      * Similar to [androidx.swiperefreshlayout.widget.SwipeRefreshLayout.mCircleView]
      * and [androidx.swiperefreshlayout.widget.SwipeRefreshLayout.mProgress]
@@ -111,22 +130,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     private var mIsBeingDragged = false
     private var mActivePointerId = INVALID_POINTER
 
-    // Whether this item is scaled up rather than clipped
-    protected var mScale = false
-
-    // Whether this item is alpha up rather than clipped
-    protected var mAlpha = false
-
-    // Whether to overlay the indicator on top of the content or not
-    var indicatorOverlay = false
-
-    // Whether auto tint color by theme
-    var autoTintColor = false
-        set(value) {
-            field = value
-            enableAutoTintColor()
-        }
-
     // Target is returning to its start offset because it was cancelled or a
     // refresh was triggered.
     private var mReturningToStart = false
@@ -142,13 +145,15 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * appear.
      */
 
-    protected var mOriginalOffsetTop: Int = 0
+    protected val mOriginalOffsetTop: Int
+        get() = -mCircleDiameter - lottieBottomSpacing
 
     /**
      * @return The offset in pixels from the top of this view at which the progress spinner should
      * come to rest after a successful swipe gesture.
      */
-    private var mSpinnerOffsetEnd: Int = 0
+    private val mSpinnerOffsetEnd: Int
+        get() = mCircleDiameter + lottieTopSpacing + lottieBottomSpacing
 
     protected var mCustomSlingshotDistance = 0
 
@@ -188,6 +193,31 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     }
 
     /**
+     * Notify the widget that refresh state has changed. Do not call this when
+     * refresh is triggered by a swipe gesture.
+     *
+     * @param refreshing Whether or not the view should show refresh progress.
+     */
+    var isRefreshing: Boolean
+        get() = mRefreshing
+        set(refreshing) {
+            if (refreshing && mRefreshing != refreshing) {
+                // scale and show
+                mRefreshing = refreshing
+                var endTarget: Int = if (!mUsingCustomStart) {
+                    mSpinnerOffsetEnd + mOriginalOffsetTop
+                } else {
+                    mSpinnerOffsetEnd
+                }
+                setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop)
+                mNotify = false
+                startScaleUpAnimation(mRefreshListener)
+            } else {
+                setRefreshing(refreshing, false /* notify */)
+            }
+        }
+
+    /**
      * Constructor that is called when inflating SwipeRefreshLayout from XML.
      */
     init {
@@ -224,19 +254,15 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Offset
     private fun initOffset(style: TypedArray) {
-        val paddingTop = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_top, dpToPx(INDICATOR_PADDING_TOP))
-        val paddingBottom =
-            style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_padding_bottom, dpToPx(INDICATOR_PADDING_BOTTOM))
-
-        mOriginalOffsetTop = -mCircleDiameter - paddingBottom
-        mSpinnerOffsetEnd = mCircleDiameter + paddingTop + paddingBottom
+        lottieTopSpacing = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_spacing_top, lottieTopSpacing)
+        lottieBottomSpacing = style.getDimensionPixelOffset(R.styleable.LottieSwipeRefreshLayout_lottie_srl_spacing_bottom, lottieBottomSpacing)
 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
         mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
-    fun reset() {
+    protected fun reset() {
         lottieAnimationView.clearAnimation()
         lottieAnimationView.cancelAnimation()
         lottieAnimationView.visibility = GONE
@@ -335,8 +361,8 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      */
     fun setProgressViewOffset(scale: Boolean, start: Int, end: Int) {
         mScale = scale
-        mOriginalOffsetTop = start
-        mSpinnerOffsetEnd = end
+        lottieBottomSpacing = -mCircleDiameter - start // Similar to mOriginalOffsetTop = start
+        lottieTopSpacing = end - (mCircleDiameter + lottieBottomSpacing) // similar to mSpinnerOffsetEnd = end
         mUsingCustomStart = true
         reset()
         mRefreshing = false
@@ -356,9 +382,27 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
      * gesture.
      */
     fun setProgressViewEndTarget(scale: Boolean, end: Int) {
-        mSpinnerOffsetEnd = end
+        lottieTopSpacing = end - (mCircleDiameter + lottieBottomSpacing) // mSpinnerOffsetEnd = end
         mScale = scale
         lottieAnimationView.invalidate()
+    }
+
+    /**
+     * The refresh indicator resting position is always positioned near the top
+     * of the refreshing content. This position is a consistent location, but
+     * can be adjusted in either direction based on whether or not there is a
+     * toolbar or actionbar present.
+     *
+     * @param topPadding the spacing from indicator to top
+     * @param bottom the spacing from indicator to bottom
+     */
+    fun setProgressVerticalPadding(topSpacing: Int, bottomSpacing: Int) {
+        this.lottieTopSpacing = topSpacing
+        this.lottieBottomSpacing = bottomSpacing
+
+        // the absolute offset has to take into account that the circle starts at an offset
+        mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
+        mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
     /**
@@ -515,31 +559,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
             Log.e(LOG_TAG, e.message.orEmpty())
         }
     }
-
-    /**
-     * Notify the widget that refresh state has changed. Do not call this when
-     * refresh is triggered by a swipe gesture.
-     *
-     * @param refreshing Whether or not the view should show refresh progress.
-     */
-    var isRefreshing: Boolean
-        get() = mRefreshing
-        set(refreshing) {
-            if (refreshing && mRefreshing != refreshing) {
-                // scale and show
-                mRefreshing = refreshing
-                var endTarget: Int = if (!mUsingCustomStart) {
-                    mSpinnerOffsetEnd + mOriginalOffsetTop
-                } else {
-                    mSpinnerOffsetEnd
-                }
-                setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop)
-                mNotify = false
-                startScaleUpAnimation(mRefreshListener)
-            } else {
-                setRefreshing(refreshing, false /* notify */)
-            }
-        }
 
     private fun ensureTarget(): Boolean {
         // Don't bother getting the parent height if the parent hasn't been laid
@@ -1289,8 +1308,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         private const val CIRCLE_DIAMETER_LARGE = 56
 
         // Spacing between lottie and top/bottom
-        private const val INDICATOR_PADDING_TOP = 12
-        private const val INDICATOR_PADDING_BOTTOM = 12
+        private const val INDICATOR_VERTICAL_PADDING = 12
 
         private const val MAX_ALPHA = 255
         private const val STARTING_PROGRESS_ALPHA = (.3f * MAX_ALPHA).toInt()

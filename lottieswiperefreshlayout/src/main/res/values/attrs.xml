@@ -17,8 +17,8 @@
         <attr name="lottie_srl_auto_tint" format="boolean" />
 
         <!--    Default is 12dp. The Spacing between Lottie View and Top/bottom     -->
-        <attr name="lottie_srl_padding_top" format="dimension" />
-        <attr name="lottie_srl_padding_bottom" format="dimension" />
+        <attr name="lottie_srl_spacing_top" format="dimension" />
+        <attr name="lottie_srl_spacing_bottom" format="dimension" />
 
         <!--    Default false. Additional animation    -->
         <attr name="lottie_srl_scale_enabled" format="boolean" />
