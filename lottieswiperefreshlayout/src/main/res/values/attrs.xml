@@ -3,17 +3,24 @@
 
     <declare-styleable name="LottieSwipeRefreshLayout">
         <attr name="android:enabled" />
+
         <!--    The Lottie is Overlay the content or not  -->
         <attr name="lottie_srl_indicator_overlay" format="boolean" />
+
+        <!--    The lottie json raw file    -->
         <attr name="lottie_srl_rawRes" format="reference" />
+
         <!--    The Lottie Animation size    -->
         <attr name="lottie_srl_size" format="dimension" />
 
-        <!--    The Spacing between Lottie View and Top.
-        This attr only works if lottie_srl_offset_end isn't defined.     -->
+        <!--    If enable, the tint color is Black if them light, or White if theme dard/night    -->
+        <attr name="lottie_srl_auto_tint" format="boolean" />
+
+        <!--    The Spacing between Lottie View and Top/bottom     -->
         <attr name="lottie_srl_padding_top" format="dimension" />
         <attr name="lottie_srl_padding_bottom" format="dimension" />
 
+        <!--    Additional animation    -->
         <attr name="lottie_srl_scale_enabled" format="boolean" />
         <attr name="lottie_srl_alpha_enabled" format="boolean" />
     </declare-styleable>

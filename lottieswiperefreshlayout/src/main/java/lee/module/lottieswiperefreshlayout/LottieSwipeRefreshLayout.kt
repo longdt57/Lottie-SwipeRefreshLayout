@@ -17,6 +17,7 @@ package lee.module.lottieswiperefreshlayout
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.graphics.Color
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
@@ -37,6 +38,7 @@ import androidx.core.view.*
 import androidx.core.widget.ListViewCompat
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
+import java.lang.Exception
 import kotlin.math.abs
 
 /**
@@ -117,6 +119,14 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
 
     // Whether to overlay the indicator on top of the content or not
     var indicatorOverlay = false
+
+    // Whether auto tint color by theme
+    var autoTintColor = false
+        set(value) {
+            if (field == value) return
+            field = value
+            enableAutoTintColor()
+        }
 
     // Target is returning to its start offset because it was cancelled or a
     // refresh was triggered.
@@ -200,6 +210,7 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         mScale = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_scale_enabled, mScale)
         mAlpha = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_scale_enabled, mAlpha)
         indicatorOverlay = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_indicator_overlay, indicatorOverlay)
+        autoTintColor = a.getBoolean(R.styleable.LottieSwipeRefreshLayout_lottie_srl_auto_tint, autoTintColor)
         a.recycle()
     }
 
@@ -224,6 +235,15 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         // the absolute offset has to take into account that the circle starts at an offset
         mTotalDragDistance = mSpinnerOffsetEnd.toFloat()
         mCurrentTargetOffsetTop = mOriginalOffsetTop
+    }
+
+    private fun enableAutoTintColor() {
+        try {
+            val color = if (resources.getBoolean(R.bool.dark_mode)) Color.WHITE else Color.BLACK
+            setColorScheme(color)
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, e.message.orEmpty())
+        }
     }
 
     fun reset() {
