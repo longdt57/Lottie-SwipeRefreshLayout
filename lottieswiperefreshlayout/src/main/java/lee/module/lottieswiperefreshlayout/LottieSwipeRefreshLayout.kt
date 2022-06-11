@@ -236,15 +236,6 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
         mCurrentTargetOffsetTop = mOriginalOffsetTop
     }
 
-    private fun enableAutoTintColor() {
-        try {
-            val color = if (resources.getBoolean(R.bool.dark_mode)) Color.WHITE else Color.BLACK
-            setColorScheme(color)
-        } catch (e: Exception) {
-            Log.e(LOG_TAG, e.message.orEmpty())
-        }
-    }
-
     fun reset() {
         lottieAnimationView.clearAnimation()
         lottieAnimationView.cancelAnimation()
@@ -511,6 +502,18 @@ open class LottieSwipeRefreshLayout @JvmOverloads constructor(context: Context, 
     fun setColorScheme(@ColorInt color: Int?) {
         if (color == null) return
         LottieHelper.setColorFilter(lottieAnimationView, color)
+    }
+
+    /**
+     * Set tint color black in light theme, tint white in dark/night theme.
+     */
+    private fun enableAutoTintColor() {
+        try {
+            val color = if (resources.getBoolean(R.bool.dark_mode)) Color.WHITE else Color.BLACK
+            setColorScheme(color)
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, e.message.orEmpty())
+        }
     }
 
     /**
