@@ -49,7 +49,7 @@ dependencies {
 <!--    Default true. The Lottie is Overlay the content or not  -->
 <attr name="lottie_srl_indicator_overlay" format="boolean" />
 
-<!--    Default loader_zipmex.json. The lottie json raw file    -->
+<!--    Default loader_...json. The lottie json raw file    -->
 <attr name="lottie_srl_rawRes" format="reference" />
 
 <!--    Default is 40dp. The Lottie Animation size    -->
